@@ -21,6 +21,7 @@ class Schedule(ScheduleBase):
 class LeaveBase(BaseModel):
     month: int
     date: list
+    period: str
 
 class LeaveCreate(LeaveBase):
     pass

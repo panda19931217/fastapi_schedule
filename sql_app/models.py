@@ -36,6 +36,7 @@ class Leave(Base):
     id = Column(Integer, primary_key=True, index=True)
     month = Column(int, index=True)
     date = Column(list, index=True)
+    period = Column(String, index=True)
     owner_id = Column(Integer, ForeignKey("users.id"))
 
     owner = relationship("User", back_populates="items")
