@@ -24,19 +24,19 @@ class Schedule(Base):
     __tablename__ = "schedule"
 
     id = Column(Integer, primary_key=True, index=True)
-    month = Column(int, index=True)
-    date = Column(list, index=True)
+    month = Column(Integer, index=True)
+    date = Column(Integer, index=True)
     owner_id = Column(Integer, ForeignKey("users.id"))
 
-    owner = relationship("User", back_populates="items")
+    owner = relationship("User", back_populates="Schedule")
 
 class Leave(Base):
     __tablename__ = "leave"
 
     id = Column(Integer, primary_key=True, index=True)
-    month = Column(int, index=True)
-    date = Column(list, index=True)
+    month = Column(Integer, index=True)
+    date = Column(Integer, index=True)
     period = Column(String, index=True)
     owner_id = Column(Integer, ForeignKey("users.id"))
 
-    owner = relationship("User", back_populates="items")
+    owner = relationship("User", back_populates="Leave")

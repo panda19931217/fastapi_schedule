@@ -19,7 +19,7 @@ def get_users(db: Session, skip: int = 0, limit: int = 100):
 def create_user(db: Session, user: schemas.UserCreate):
     fake_hashed_password = user.password + "notreallyhashed"
     present_time = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
-    db_user = models.User(email=user.email, hashed_password=fake_hashed_password,create_time=present_time)
+    db_user = models.User(email=user.email, hashed_password=fake_hashed_password,create_time=present_time,user_name=user.user_name,memmber_type=user.memmber_type,skill=user.skill)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
@@ -41,7 +41,7 @@ def get_leave(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.Leave).offset(skip).limit(limit).all()
 
 
-def create_user_schedule(db: Session, leave: schemas.ScheduleCreate, user_id: int):
+def create_user_leave(db: Session, leave: schemas.ScheduleCreate, user_id: int):
     db_leave = models.Leave(**leave.dict(), owner_id=user_id)
     db.add(db_leave)
     db.commit()
