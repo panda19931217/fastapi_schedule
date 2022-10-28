@@ -16,8 +16,8 @@ class User(Base):
     is_active = Column(Boolean, default=True)
     create_time = Column(String, index=True)
 
-    Schedule = relationship("Schedule", back_populates="owner")
-    Leave = relationship("Leave", back_populates="owner")
+    schedule = relationship("Schedule", back_populates="owner")
+    leave = relationship("Leave", back_populates="owner")
 
 
 class Schedule(Base):
@@ -25,18 +25,18 @@ class Schedule(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     month = Column(Integer, index=True)
-    date = Column(Integer, index=True)
+    date = Column(String, index=True)
     owner_id = Column(Integer, ForeignKey("users.id"))
 
-    owner = relationship("User", back_populates="Schedule")
+    owner = relationship("User", back_populates="schedule")
 
 class Leave(Base):
     __tablename__ = "leave"
 
     id = Column(Integer, primary_key=True, index=True)
     month = Column(Integer, index=True)
-    date = Column(Integer, index=True)
+    date = Column(String, index=True)
     period = Column(String, index=True)
     owner_id = Column(Integer, ForeignKey("users.id"))
 
-    owner = relationship("User", back_populates="Leave")
+    owner = relationship("User", back_populates="leave")

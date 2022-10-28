@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 class ScheduleBase(BaseModel):
     month: int
-    date: list
+    date: str
 
 class ScheduleCreate(ScheduleBase):
     pass
@@ -20,7 +20,7 @@ class Schedule(ScheduleBase):
 
 class LeaveBase(BaseModel):
     month: int
-    date: list
+    date: str
     period: str
 
 class LeaveCreate(LeaveBase):
