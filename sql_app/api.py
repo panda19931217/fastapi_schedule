@@ -1,6 +1,5 @@
 from typing import List, Union
 from datetime import datetime, timedelta
-
 from fastapi import Depends, FastAPI, HTTPException, status
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -178,9 +177,15 @@ def create_schedule_for_user(
     return crud.create_user_schedule(db=db, schedule=schedule, user_id=user_id)
 
 
+# @app.get("/schedule/", response_model=List[schemas.Schedule])
+# def read_schedule(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+#    schedule = crud.get_schedule(db, skip=skip, limit=limit)
+#    return schedule
+
 @app.get("/schedule/", response_model=List[schemas.Schedule])
-def read_schedule(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    schedule = crud.get_schedule(db, skip=skip, limit=limit)
+def read_schedule(int_month: int = 1, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    schedule = crud.get_schedule(
+        db, int_month=int_month, skip=skip, limit=limit)
     return schedule
 
 
