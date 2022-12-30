@@ -163,22 +163,24 @@ def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     users = crud.get_users(db, skip=skip, limit=limit)
     return users
 
-@app.get("/users/schedule", response_model=List[schemas.User])
+@app.get("/users/schedule")
 def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     users = crud.get_users(db, skip=skip, limit=limit)
-    users = jsonable_encoder(users)
-    print(users)
     lst_info = []
+    num = 0
     for info in users:
-        for date in info.schedule.date.split(','):
-    #         dic_info = {
-    #             'user_name': info.user_name,
-    #             'month': info.month,
-    #             'date': date
-    #         }
-    #         lst_info.append(dic_info)
-    print(lst_info)
-    return users
+        if not info.schedule:
+            continue
+        for date in info.schedule[0].date.split(','):
+            dic_info = {
+                'user_name': info.user_name,
+                'month': info.schedule[0].month,
+                'date': int(date),
+                'user_num': num
+            }
+            lst_info.append(dic_info)
+        num += 1
+    return lst_info
 
 
 @app.get("/users/{user_id}", response_model=schemas.User)
