@@ -34,8 +34,26 @@ def create_user(db: Session, user: schemas.UserCreate):
     return db_user
 
 
-def get_schedule(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.Schedule).offset(skip).limit(limit).all()
+def get_schedule(db: Session, int_month: int = datetime.now().month, skip: int = 0, limit: int = 100):
+    '''
+    return
+    [
+        {
+          title: username,
+          allDay: true,
+          start: new Date(y, m, 1),
+          end: new Date(y, m, 1),
+          color: "default",
+        }
+    ]
+    '''
+
+    lst_dic_data = db.query(models.Schedule).filter(models.Schedule.month == int_month).offset(skip).limit(limit).all()
+    # lst_dic_out = []
+    # for dic in lst_dic_data:
+    #     dic['title'] =
+
+    return lst_dic_data
 
 
 def create_user_schedule(db: Session, schedule: schemas.ScheduleCreate, user_id: int):

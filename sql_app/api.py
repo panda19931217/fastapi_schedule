@@ -8,6 +8,7 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.encoders import jsonable_encoder
 from . import crud, models, schemas
 from .database import SessionLocal, engine
 import uvicorn
@@ -162,6 +163,23 @@ def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     users = crud.get_users(db, skip=skip, limit=limit)
     return users
 
+@app.get("/users/schedule", response_model=List[schemas.User])
+def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    users = crud.get_users(db, skip=skip, limit=limit)
+    users = jsonable_encoder(users)
+    print(users)
+    lst_info = []
+    for info in users:
+        for date in info.schedule.date.split(','):
+    #         dic_info = {
+    #             'user_name': info.user_name,
+    #             'month': info.month,
+    #             'date': date
+    #         }
+    #         lst_info.append(dic_info)
+    print(lst_info)
+    return users
+
 
 @app.get("/users/{user_id}", response_model=schemas.User)
 def read_user(user_id: int, db: Session = Depends(get_db)):
@@ -179,8 +197,8 @@ def create_schedule_for_user(
 
 
 @app.get("/schedule/", response_model=List[schemas.Schedule])
-def read_schedule(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    schedule = crud.get_schedule(db, skip=skip, limit=limit)
+def read_schedule(month: int = 1,skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    schedule = crud.get_schedule(db, month, skip=skip, limit=limit)
     return schedule
 
 
