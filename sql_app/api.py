@@ -165,8 +165,8 @@ def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
 def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     users = crud.get_users(db, skip=skip, limit=limit)
     lst_info = []
-    num = 0
-    for info in users:
+
+    for num, info in enumerate(users):
         if not info.schedule:
             continue
         for date in info.schedule[0].date.split(','):
@@ -177,7 +177,6 @@ def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
                 'user_num': num
             }
             lst_info.append(dic_info)
-        num += 1
     return lst_info
 
 @app.get("/users/{user_id}", response_model=schemas.User)
