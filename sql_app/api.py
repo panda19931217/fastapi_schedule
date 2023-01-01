@@ -1,5 +1,6 @@
 from typing import List, Union
 from datetime import datetime, timedelta
+import calendar
 
 from fastapi import Depends, FastAPI, HTTPException, status
 from sqlalchemy.orm import Session
@@ -8,10 +9,10 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.encoders import jsonable_encoder
 from . import crud, models, schemas
 from .database import SessionLocal, engine
 import uvicorn
+from .sechedule import ortools_sechedule
 
 
 models.Base.metadata.create_all(bind=engine)
@@ -215,3 +216,37 @@ def create_leave_for_user(
 def read_leave(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     leave = crud.get_leave(db, skip=skip, limit=limit)
     return leave
+
+@app.get("/calculate/schedule_and_leave")
+def calculate_schedule_and_leave(year: int = 2023, month: int = 1 ,db: Session = Depends(get_db)):
+    day_of_this_month = calendar.monthrange(year, month)[1]
+    leave = crud.get_leave_by_month(db, month=month)
+    lst_employees = []
+    lst_leave = []
+    for info in leave:
+        for date in info.date.split(','):
+            lst_employees.append(str(info.owner_id)) if str(info.owner_id) not in lst_employees else lst_employees
+            if date == '0':
+                continue
+            lst_in = [str(info.owner_id), int(date)]
+            lst_leave.append(lst_in)
+
+    output = ortools_sechedule(
+            lst_employees=['4', '5', '6', '7'],
+            day_of_this_month=day_of_this_month,
+            max_employee_one_shifts=3,
+            min_employee_one_shifts=2,
+            max_continue_shifts=7,
+            lst_leave=[]
+    )
+    print(output)
+    for i in output:
+        print(list(i.values())[0])
+        dic_schedule = {
+            "month": month,
+            "date": ','.join(map(str, list(i.values())[0]))
+        }
+        print(dic_schedule)
+        # schedule = crud.create_user_schedule(db=db, schedule=dic_schedule, user_id=int(list(i.keys())[0]))
+
+    return None

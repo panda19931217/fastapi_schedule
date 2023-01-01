@@ -67,6 +67,8 @@ def create_user_schedule(db: Session, schedule: schemas.ScheduleCreate, user_id:
 def get_leave(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.Leave).offset(skip).limit(limit).all()
 
+def get_leave_by_month(db: Session, month: int):
+    return db.query(models.Leave).filter(models.Leave.month == month).all()
 
 def create_user_leave(db: Session, leave: schemas.ScheduleCreate, user_id: int):
     db_leave = models.Leave(**leave.dict(), owner_id=user_id)
