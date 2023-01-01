@@ -246,7 +246,6 @@ def calculate_schedule_and_leave(year: int = 2023, month: int = 1 ,db: Session =
             "month": month,
             "date": ','.join(map(str, list(i.values())[0]))
         }
-        print(dic_schedule)
-        # schedule = crud.create_user_schedule(db=db, schedule=dic_schedule, user_id=int(list(i.keys())[0]))
+        schedule = crud.create_user_schedule(db=db, schedule=schemas.ScheduleBase(month=month, date=','.join(map(str, list(i.values())[0]))), user_id=int(list(i.keys())[0]))
 
     return None
