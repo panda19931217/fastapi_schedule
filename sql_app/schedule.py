@@ -6,7 +6,7 @@ def ortools_sechedule(
         day_of_this_month: int = 30,
         max_employee_one_shifts: int = 3,
         min_employee_one_shifts: int = 2,
-        max_continue_shifts: int = 7,
+        max_continue_shifts: int = 5,
         lst_leave: list = []
 ):
     # 定義模型
@@ -38,7 +38,7 @@ def ortools_sechedule(
     model.Add(sum(sum(schedules[employee][day] for day in range(1, day_of_this_month + 1)) for employee in
                   employees) <= day_of_this_month * len(employees))
 
-    # 不能連續上班7天
+    # 不能連續上班5天
     for employee in employees:
         for day in range(1, 25):
             model.Add(

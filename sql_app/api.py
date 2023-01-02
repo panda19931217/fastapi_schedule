@@ -240,7 +240,7 @@ def calculate_schedule_and_leave(year: int = 2023, month: int = 1 ,db: Session =
             day_of_this_month=day_of_this_month,
             max_employee_one_shifts=3,
             min_employee_one_shifts=2,
-            max_continue_shifts=7,
+            max_continue_shifts=5,
             lst_leave=[]
     )
     print(output)
