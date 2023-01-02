@@ -164,20 +164,22 @@ def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
 
 @app.get("/users/schedule")
 def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    
     users = crud.get_users(db, skip=skip, limit=limit)
+    
     lst_info = []
-
     for num, info in enumerate(users):
         if not info.schedule:
             continue
-        for date in info.schedule[0].date.split(','):
-            dic_info = {
-                'user_name': info.user_name,
-                'month': info.schedule[0].month,
-                'date': int(date),
-                'user_num': num
-            }
-            lst_info.append(dic_info)
+        for schedule in info.schedule:
+            for date in schedule.date.split(','):
+                dic_info = {
+                    'user_name': info.user_name,
+                    'month': schedule.month,
+                    'date': int(date),
+                    'user_num': num
+                }
+                lst_info.append(dic_info)
     return lst_info
 
 @app.get("/users/{user_id}", response_model=schemas.User)
