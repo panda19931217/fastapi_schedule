@@ -11,7 +11,7 @@ from . import crud, models, schemas
 from .database import SessionLocal, engine
 import uvicorn
 import calendar
-from .schedule import ortools_sechedule
+from .sechedule import ortools_sechedule
 
 models.Base.metadata.create_all(bind=engine)
 
