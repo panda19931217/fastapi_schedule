@@ -1,7 +1,5 @@
 from typing import List, Union
 from datetime import datetime, timedelta
-import calendar
-
 from fastapi import Depends, FastAPI, HTTPException, status
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -12,8 +10,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from . import crud, models, schemas
 from .database import SessionLocal, engine
 import uvicorn
-from .sechedule import ortools_sechedule
-
+import calendar
+from .schedule import ortools_sechedule
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -23,6 +21,7 @@ origins = [
     "http://localhost:3000",
     "localhost:3000"
 ]
+
 
 # Dependency
 
@@ -140,6 +139,7 @@ async def read_users_me(current_user: schemas.User = Depends(get_current_active_
 async def read_own_items(current_user: schemas.User = Depends(get_current_active_user)):
     return [{"item_id": "Foo", "owner": current_user.user_name}]
 
+
 # =================================================================================
 
 app.add_middleware(
@@ -164,61 +164,81 @@ def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     users = crud.get_users(db, skip=skip, limit=limit)
     return users
 
-@app.get("/users/schedule")
-def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    users = crud.get_users(db, skip=skip, limit=limit)
-    lst_info = []
-    num = 0
-    for info in users:
-        if not info.schedule:
-            continue
-        for date in info.schedule[0].date.split(','):
-            dic_info = {
-                'user_name': info.user_name,
-                'month': info.schedule[0].month,
-                'date': int(date),
-                'user_num': num
-            }
-            lst_info.append(dic_info)
-        num += 1
-    return lst_info
-
 
 @app.get("/users/{user_id}", response_model=schemas.User)
-def read_user(user_id: int, db: Session = Depends(get_db)):
+def read_user_by_id(user_id: int, db: Session = Depends(get_db)):
     db_user = crud.get_user(db, user_id=user_id)
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
     return db_user
 
 
+@app.get("/schedule")
+def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    users = crud.get_users(db, skip=skip, limit=limit)
+    lst_info = []
+    for num, info in enumerate(users):
+        if not info.schedule:
+            continue
+        for schedule in info.schedule:
+            dic_info = {
+                'user_name': info.user_name,
+                'year': schedule.year,
+                'month': schedule.month,
+                'date': schedule.date,
+                'period': schedule.period,
+                'user_num': num
+            }
+            lst_info.append(dic_info)
+    return lst_info
+
+
 @app.post("/users/{user_id}/schedule/", response_model=schemas.Schedule)
 def create_schedule_for_user(
-    user_id: int, schedule: schemas.ScheduleCreate, db: Session = Depends(get_db)
+        user_id: int, schedule: schemas.ScheduleCreate, db: Session = Depends(get_db)
 ):
     return crud.create_user_schedule(db=db, schedule=schedule, user_id=user_id)
 
 
-@app.get("/schedule/", response_model=List[schemas.Schedule])
-def read_schedule(month: int = 1,skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    schedule = crud.get_schedule(db, month, skip=skip, limit=limit)
-    return schedule
+# @app.get("/schedule/", response_model=List[schemas.Schedule])
+# def read_schedule(int_month: int = 1, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+#     schedule = crud.get_schedule(db, int_month=int_month, skip=skip, limit=limit)
+#     return schedule
 
 
 @app.post("/users/{user_id}/leave/", response_model=schemas.Leave)
 def create_leave_for_user(
-    user_id: int, leave: schemas.LeaveCreate, db: Session = Depends(get_db)
+        user_id: int, leave: schemas.LeaveCreate, db: Session = Depends(get_db)
 ):
-    return crud.create_user_leave(db=db, leave=leave, user_id=user_id)
+    return crud.create_user_leave(db=db, leave=leave, user_id=user_id, year=leave.year, month=leave.month)
+
+@app.get("/leave")
+def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    users = crud.get_users(db, skip=skip, limit=limit)
+    lst_info = []
+    for num, info in enumerate(users):
+        if not info.leave:
+            continue
+        for leave in info.leave:
+            dic_info = {
+                'user_name': info.user_name,
+                'year': leave.year,
+                'month': leave.month,
+                'date': leave.date,
+                'period': leave.period,
+                'user_num': num
+            }
+            lst_info.append(dic_info)
+    return lst_info
 
 
-@app.get("/leave/", response_model=List[schemas.Schedule])
-def read_leave(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    leave = crud.get_leave(db, skip=skip, limit=limit)
-    return leave
+# @app.get("/leave/", response_model=List[schemas.Schedule])
+# def read_leave(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+#     leave = crud.get_leave(db, skip=skip, limit=limit)
+#     return leave
 
 @app.get("/calculate/schedule_and_leave")
-def calculate_schedule_and_leave(year: int = 2023, month: int = 1 ,db: Session = Depends(get_db)):
+def calculate_schedule_and_leave(year: int = 2023, month: int = 1, db: Session = Depends(get_db)):
     day_of_this_month = calendar.monthrange(year, month)[1]
     leave = crud.get_leave_by_month(db, month=month)
     lst_employees = []
@@ -232,12 +252,12 @@ def calculate_schedule_and_leave(year: int = 2023, month: int = 1 ,db: Session =
             lst_leave.append(lst_in)
 
     output = ortools_sechedule(
-            lst_employees=['4', '5', '6', '7'],
-            day_of_this_month=day_of_this_month,
-            max_employee_one_shifts=3,
-            min_employee_one_shifts=2,
-            max_continue_shifts=7,
-            lst_leave=[]
+        lst_employees=['4', '5', '6', '7'],
+        day_of_this_month=day_of_this_month,
+        max_employee_one_shifts=3,
+        min_employee_one_shifts=2,
+        max_continue_shifts=5,
+        lst_leave=[]
     )
     print(output)
     for i in output:
@@ -246,6 +266,5 @@ def calculate_schedule_and_leave(year: int = 2023, month: int = 1 ,db: Session =
             "month": month,
             "date": ','.join(map(str, list(i.values())[0]))
         }
-        schedule = crud.create_user_schedule(db=db, schedule=schemas.ScheduleBase(month=month, date=','.join(map(str, list(i.values())[0]))), user_id=int(list(i.keys())[0]))
-
-    return None
+        crud.create_user_schedule(db=db, schedule=schemas.ScheduleBase(**dic_schedule), user_id=int(list(i.keys())[0]),
+                                  year=year, month=month)
