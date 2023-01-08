@@ -4,8 +4,10 @@ from pydantic import BaseModel
 
 
 class ScheduleBase(BaseModel):
+    year: int
     month: int
-    date: str
+    date: int
+    period: str
 
 
 class ScheduleCreate(ScheduleBase):
@@ -22,8 +24,9 @@ class Schedule(ScheduleBase):
 
 
 class LeaveBase(BaseModel):
+    year: int
     month: int
-    date: str
+    date: int
     period: str
 
 
@@ -45,6 +48,7 @@ class Leave(LeaveBase):
 class UserBase(BaseModel):
     email: str
     user_name: str
+    resturant_nb: int
     memmber_type: str = 'Staff'
     skill: str
 

@@ -172,11 +172,12 @@ def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
         if not info.schedule:
             continue
         for schedule in info.schedule:
-            for date in schedule.date.split(','):
                 dic_info = {
                     'user_name': info.user_name,
+                    'year': schedule.year,
                     'month': schedule.month,
-                    'date': int(date),
+                    'date': schedule.date,
+                    'period' : schedule.period,
                     'user_num': num
                 }
                 lst_info.append(dic_info)

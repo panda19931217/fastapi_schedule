@@ -11,6 +11,7 @@ class User(Base):
     user_name = Column(String, unique=True, index=True)
     email = Column(String, unique=True, index=True)
     skill = Column(String, index=True)
+    resturant_nb = Column(Integer, index=True)
     memmber_type = Column(String, index=True)
     is_active = Column(Boolean, default=True)
     hashed_password = Column(String)
@@ -24,8 +25,10 @@ class Schedule(Base):
     __tablename__ = "schedule"
 
     id = Column(Integer, primary_key=True, index=True)
+    year = Column(Integer, index=True)
     month = Column(Integer, index=True)
-    date = Column(String, index=True)
+    date = Column(Integer, index=True)
+    period = Column(String, index=True)
     owner_id = Column(Integer, ForeignKey("users.id"))
 
     owner = relationship("User", back_populates="schedule")
@@ -35,8 +38,9 @@ class Leave(Base):
     __tablename__ = "leave"
 
     id = Column(Integer, primary_key=True, index=True)
+    year = Column(Integer, index=True)
     month = Column(Integer, index=True)
-    date = Column(String, index=True)
+    date = Column(Integer, index=True)
     period = Column(String, index=True)
     owner_id = Column(Integer, ForeignKey("users.id"))
 
